@@ -1,9 +1,5 @@
 import torch
 import torch.nn as nn
-from tqdm import tqdm
-from torch.utils.data import DataLoader
-import matplotlib.pyplot as plt
-import numpy as np
 
 class NeRFModel(nn.Module):
     """
@@ -81,3 +77,12 @@ class NeRFModel(nn.Module):
         return color, sigma
     
 
+if __name__ == "__main__":
+    model = NeRFModel()
+    print(model)
+    # random input
+    x = torch.randn(1, 3)
+    d = torch.randn(1, 3)
+    color, sigma = model(x, d)
+    print(f"Color: {color}")
+    print(f"Sigma: {sigma}")
