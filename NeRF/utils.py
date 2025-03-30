@@ -46,7 +46,7 @@ def ray_renderer(NeRFModel, ray_origins, ray_dirxn, hn=0, hf=0.5, num_bins=192):
 
     # Sample points along the ray
     points_along_ray = ray_origins.unsqueeze(1) + ray_dirxn.unsqueeze(1) * t.unsqueeze(-1)   # o + d*t => [B, num_bins, 3] 
-    ray_directions = ray_directions.expand(num_bins, ray_directions.shape[0], 3).transpose(0, 1)    # [num_bins, B, 3]
+    ray_directions = ray_dirxn.expand(num_bins, ray_dirxn.shape[0], 3).transpose(0, 1)    # [num_bins, B, 3]
 
     main_shape = points_along_ray.shape
     points_along_ray = points_along_ray.reshape(-1, 3)   # [B*num_bins, 3]
@@ -62,6 +62,6 @@ def ray_renderer(NeRFModel, ray_origins, ray_dirxn, hn=0, hf=0.5, num_bins=192):
     weights = compute_accumulated_transmittance(1 - alpha).unsqueeze(2) * alpha.unsqueeze(2)
 
     weighted_colors = (weights * colors).sum(dim=1)
-    sum_weights = weights.sum(dim=-1).sum(dim=-1).unsqeeze(-1)  # regularization term for scenes with white bg, else not needed
+    sum_weights = weights.sum(dim=-1).sum(dim=-1).unsqueeze(-1)  # regularization term for scenes with white bg, else not needed
 
     return weighted_colors + 1 - sum_weights

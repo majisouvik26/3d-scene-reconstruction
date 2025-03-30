@@ -45,7 +45,7 @@ class NeRFModel(nn.Module):
             nn.Sigmoid(),
         )
 
-    def positional_encoding(x, num_encoding_functions=6):
+    def positional_encoding(self, x, num_encoding_functions=6):
         """
         Positional Encoding for 3D coordinates - helps us to learn high-frequency signals in the scenes
         3D Input -> 63-dimension for the position, 24-dimension for the direction output
