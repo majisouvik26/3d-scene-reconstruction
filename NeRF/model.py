@@ -11,6 +11,8 @@ class NeRFModel(nn.Module):
         self.embedding_dim_pos = embedding_dim_pos
         self.embedding_dim_dirxn = embedding_dim_dirxn
         self.relu = nn.ReLU()
+        print(f"Embedding Dim Pos: {self.embedding_dim_pos}, Type: {type(self.embedding_dim_pos)}")
+        print(f"Embedding Dim Dirxn: {self.embedding_dim_dirxn}, Type: {type(self.embedding_dim_dirxn)}")
 
         self.block1 = nn.Sequential(
             nn.Linear(self.embedding_dim_pos*6 + 3, hidden_dim),

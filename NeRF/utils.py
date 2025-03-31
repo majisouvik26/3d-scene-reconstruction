@@ -12,7 +12,7 @@ def compute_accumulated_transmittance(alphas):
         [torch.ones((accumulated_transmittance.shape[0], 1), device=alphas.device), temp], dim=-1
     )
 
-def ray_renderer(NeRFModel, ray_origins, ray_dirxn, hn=0, hf=0.5, num_bins=192):
+def ray_renderer(model, ray_origins, ray_dirxn, hn=0, hf=0.5, num_bins=192):
     """
     Fig 2 of the paper
     Args:
@@ -38,14 +38,14 @@ def ray_renderer(NeRFModel, ray_origins, ray_dirxn, hn=0, hf=0.5, num_bins=192):
 
     width = torch.cat(  # the delta for the summation (instead of integral)
         [
-            t[:, :-1] - t[:, 1:],
+            t[:, 1:] - t[:, :-1],
             torch.tensor(1e9, device=device).expand(ray_origins.shape[0], 1),
         ],
         dim=-1,
     )
 
     # Sample points along the ray
-    points_along_ray = ray_origins.unsqueeze(1) + ray_dirxn.unsqueeze(1) * t.unsqueeze(-1)   # o + d*t => [B, num_bins, 3] 
+    points_along_ray = ray_origins.unsqueeze(1) + ray_dirxn.unsqueeze(1) * t.unsqueeze(2)   # o + d*t => [B, num_bins, 3] 
     ray_directions = ray_dirxn.expand(num_bins, ray_dirxn.shape[0], 3).transpose(0, 1)    # [num_bins, B, 3]
 
     main_shape = points_along_ray.shape
@@ -53,7 +53,7 @@ def ray_renderer(NeRFModel, ray_origins, ray_dirxn, hn=0, hf=0.5, num_bins=192):
     ray_directions = ray_directions.reshape(-1, 3)   # [B*num_bins, 3]
 
 
-    colors, sigma = NeRFModel(points_along_ray, ray_directions)
+    colors, sigma = model(points_along_ray, ray_directions)
     colors = colors.reshape(main_shape)
     sigma = sigma.reshape(main_shape[:-1])
 
