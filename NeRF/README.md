@@ -15,7 +15,7 @@ This is an implementation of Neural Radiance Fields (NeRF) for 3D scene reconstr
 1. Clone this repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/majisouvik26/3d-scene-reconstruction
 cd NeRF
 ```
 
@@ -95,6 +95,7 @@ This will create a GIF animation named `truck_reconstruction.gif` in the `output
 ![NeRF Reconstruction Animation](output/truck_reconstruction.gif)
 
 Animation specifications:
+
 - Format: GIF
 - Frame Rate: 10 FPS (100ms per frame)
 - Resolution: Matches the training images (default: 400x400)
