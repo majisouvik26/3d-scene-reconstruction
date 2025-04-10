@@ -1,15 +1,19 @@
 import torch
+import logging
 
-def compute_accumulated_transmittance(alphas):
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+
+def get_accumulated_transmittance(alphas):
     """
     Computes the accumulated transmittance from alpha values.
     C_hat(r) on page 6 of the paper = cumo_prod of the alphas
     """
 
-    accumulated_transmittance = torch.cumprod(alphas, dim=1)
-    temp = accumulated_transmittance[:, :-1]
+    at = torch.cumprod(alphas, dim=1)   # accumulated transmittance
+    at_last = at[:, :-1]
     return torch.cat(
-        [torch.ones((accumulated_transmittance.shape[0], 1), device=alphas.device), temp], dim=-1
+        [torch.ones((at.shape[0], 1), device=alphas.device), at_last], dim=-1
     )
 
 def ray_renderer(model, ray_origins, ray_dirxn, hn=0, hf=0.5, num_bins=192):
@@ -26,7 +30,7 @@ def ray_renderer(model, ray_origins, ray_dirxn, hn=0, hf=0.5, num_bins=192):
     """
     device = ray_origins.device
 
-    # Sample points along the ray
+    # Sample t num of points along the ray
     t = torch.linspace(hn, hf, num_bins, device=device).expand(ray_origins.shape[0], num_bins)
 
     mid = (t[:, :-1] + t[:, 1:]) / 2.0
@@ -36,7 +40,8 @@ def ray_renderer(model, ray_origins, ray_dirxn, hn=0, hf=0.5, num_bins=192):
     u_rand = torch.rand(t.shape, device=device)
     t = l + (u - l) * u_rand
 
-    width = torch.cat(  # the delta for the summation (instead of integral)
+    # since we want to do summation instead of integral, calc the deltas
+    width = torch.cat(  # bw each of the successive pair of points amongst t
         [
             t[:, 1:] - t[:, :-1],
             torch.tensor(1e9, device=device).expand(ray_origins.shape[0], 1),
@@ -52,16 +57,23 @@ def ray_renderer(model, ray_origins, ray_dirxn, hn=0, hf=0.5, num_bins=192):
     points_along_ray = points_along_ray.reshape(-1, 3)   # [B*num_bins, 3]
     ray_directions = ray_directions.reshape(-1, 3)   # [B*num_bins, 3]
 
-
     colors, sigma = model(points_along_ray, ray_directions)
+    # logging.debug(f"Colors: {colors}")
+    # logging.debug(f"Sigma: {sigma}")
+
     colors = colors.reshape(main_shape)
     sigma = sigma.reshape(main_shape[:-1])
 
     # Compute weighted colors for each ray
     alpha = 1 - torch.exp(-sigma * width)
-    weights = compute_accumulated_transmittance(1 - alpha).unsqueeze(2) * alpha.unsqueeze(2)
+    weights = get_accumulated_transmittance(1 - alpha).unsqueeze(2) * alpha.unsqueeze(2)
+    # logging.debug(f"Alpha: {alpha}")
+    # logging.debug(f"Weights: {weights}")
 
     weighted_colors = (weights * colors).sum(dim=1)
-    sum_weights = weights.sum(dim=-1).sum(dim=-1).unsqueeze(-1)  # regularization term for scenes with white bg, else not needed
+    sum_weights = weights.sum(dim=-1).sum(dim=-1)  # regularization term for scenes with white bg, else not needed
+    sum_weights  = sum_weights.unsqueeze(-1)
+    # logging.debug(f"Weighted Colors: {weighted_colors}")
+    # logging.debug(f"Sum Weights: {sum_weights}")
 
     return weighted_colors + 1 - sum_weights
