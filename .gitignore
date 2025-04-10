@@ -175,3 +175,6 @@ cython_debug/
 
 # Datasets
 *.pkl
+
+Pix2Vox/datasets
+Pix2Vox/saved_model
