@@ -88,7 +88,14 @@ To visualize the results, you can use the `convert_to_mp4.py` script to convert 
 python convert_to_mp4.py
 ```
 
-This will create an MP4 video of the rendered novel views, which you can play to see the 3D reconstruction in action.
+This will create an MP4 video named `truck_reconstruction.mp4` in the `output/` directory. The video will show a smooth interpolation between different viewpoints of the reconstructed 3D scene.
+
+### Result Video
+
+<video width="100%" controls>
+  <source src="output/truck_reconstruction.mp4" type="video/mp4">
+  Your browser does not support the video tag. You can [download the video](output/truck_reconstruction.mp4) instead.
+</video>
 
 ## Implementation Details
 
