@@ -82,20 +82,23 @@ The test method will:
 
 ## Visualization
 
-To visualize the results, you can use the `convert_to_mp4.py` script to convert the rendered images to a video:
+To visualize the results, you can use the `convert_to_mp4_gif.py` script to convert the rendered images to a GIF animation:
 
 ```bash
-python convert_to_mp4.py
+python convert_to_mp4_gif.py
 ```
 
-This will create an MP4 video named `truck_reconstruction.mp4` in the `output/` directory. The video will show a smooth interpolation between different viewpoints of the reconstructed 3D scene.
+This will create a GIF animation named `truck_reconstruction.gif` in the `output/` directory. The animation will show a smooth interpolation between different viewpoints of the reconstructed 3D scene.
 
-### Result Video
+### Result Animation
 
-<video width="100%" controls>
-  <source src="output/truck_reconstruction.mp4" type="video/mp4">
-  Your browser does not support the video tag. You can [download the video](output/truck_reconstruction.mp4) instead.
-</video>
+![NeRF Reconstruction Animation](output/truck_reconstruction.gif)
+
+Animation specifications:
+- Format: GIF
+- Frame Rate: 10 FPS (100ms per frame)
+- Resolution: Matches the training images (default: 400x400)
+- Location: `output/truck_reconstruction.gif`
 
 ## Implementation Details
 
