@@ -1,0 +1,11 @@
+argparse
+easydict
+matplotlib
+numpy
+opencv-python
+scipy
+torch
+torchvision
+streamlit
+plotly
+pillow
