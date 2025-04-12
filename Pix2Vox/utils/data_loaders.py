@@ -25,8 +25,6 @@ class DatasetType(Enum):
     VAL = 2
 
 
-# //////////////////////////////// = End of DatasetType Class Definition = ///////////////////////////////// #
-
 
 class ShapeNetDataset(torch.utils.data.dataset.Dataset):
     """ShapeNetDataset class used for PyTorch DataLoader"""
@@ -88,8 +86,6 @@ class ShapeNetDataset(torch.utils.data.dataset.Dataset):
 
         return taxonomy_name, sample_name, np.asarray(rendering_images), volume
 
-
-# //////////////////////////////// = End of ShapeNetDataset Class Definition = ///////////////////////////////// #
 
 
 class ShapeNetDataLoader:
@@ -166,47 +162,6 @@ class ShapeNetDataLoader:
 
         return files_of_taxonomy
 
-
-# /////////////////////////////// = End of ShapeNetDataLoader Class Definition = /////////////////////////////// #
-
-
-class Pascal3dDataset(torch.utils.data.dataset.Dataset):
-    """Pascal3D class used for PyTorch DataLoader"""
-    def __init__(self, file_list, transforms=None):
-        self.file_list = file_list
-        self.transforms = transforms
-
-    def __len__(self):
-        return len(self.file_list)
-
-    def __getitem__(self, idx):
-        taxonomy_name, sample_name, rendering_images, volume, bounding_box = self.get_datum(idx)
-
-        if self.transforms:
-            rendering_images = self.transforms(rendering_images, bounding_box)
-
-        return taxonomy_name, sample_name, rendering_images, volume
-
-    def get_datum(self, idx):
-        taxonomy_name = self.file_list[idx]['taxonomy_name']
-        sample_name = self.file_list[idx]['sample_name']
-        rendering_image_path = self.file_list[idx]['rendering_image']
-        bounding_box = self.file_list[idx]['bounding_box']
-        volume_path = self.file_list[idx]['volume']
-
-        # Get data of rendering images
-        rendering_image = cv2.imread(rendering_image_path, cv2.IMREAD_UNCHANGED).astype(np.float32) / 255.
-
-        if len(rendering_image.shape) < 3:
-            print('[WARN] %s It seems the image file %s is grayscale.' % (dt.now(), rendering_image_path))
-            rendering_image = np.stack((rendering_image, ) * 3, -1)
-
-        # Get data of volume
-        with open(volume_path, 'rb') as f:
-            volume = utils.binvox_rw.read_as_3d_array(f)
-            volume = volume.data.astype(np.float32)
-
-        return taxonomy_name, sample_name, np.asarray([rendering_image]), volume, bounding_box
 
 
 

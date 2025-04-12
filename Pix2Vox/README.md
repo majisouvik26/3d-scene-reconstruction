@@ -37,17 +37,28 @@ Used the [ShapeNet](https://www.shapenet.org/) which is available below:
     ├── requirements.txt
     └── run.py                          #to run training/testing interactively
 
+## Download the trained model
+The trained model can be downloaded from the following link:https://drive.google.com/file/d/1bBA3_jC7BSLm0QXtc1NQv4spYVvDWXPB/view?usp=sharing
+
 
 ## Commands
 
 To train Pix2Vox, you can simply use the following command:
 
 ```
-python3 runner.py
+python run.py
 ```
 
-For testing Pix2Vox, you can use the following command:
+For testing Pix2Vox on test_dataset, you can use the following command:
 
 ```
-python3 runner.py --test --weights=/path/to/pretrained/model.pth
+python run.py --test --weights=/path/to/pretrained/model.pth
 ```
+
+For testing Pix2Vox for constructing a single model from it multiview images
+
+```
+python run.py --test --weights=/path/to/pretrained/model.pth --img_dir=/path/to/where/multiview/images/are --n_views=3
+```
+
+specifying n_views is optional as if not specified all images in the directory will be used

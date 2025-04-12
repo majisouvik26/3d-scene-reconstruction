@@ -203,7 +203,7 @@ def read_as_coord_array(fp, fix_coords=True):
     return Voxels(np.ascontiguousarray(data), dims, translate, scale, axis_order)
 
 
-def dense_to_sparse(voxel_data, dtype=np.int):
+def dense_to_sparse(voxel_data, dtype=int):
     """ From dense representation to sparse (coordinate) representation.
     No coordinate reordering.
     """
@@ -212,7 +212,7 @@ def dense_to_sparse(voxel_data, dtype=np.int):
     return np.asarray(np.nonzero(voxel_data), dtype)
 
 
-def sparse_to_dense(voxel_data, dims, dtype=np.bool):
+def sparse_to_dense(voxel_data, dims, dtype=bool):
     if voxel_data.ndim != 2 or voxel_data.shape[0] != 3:
         raise ValueError('[ERROR] voxel_data is wrong shape; should be 3xN array.')
     if np.isscalar(dims):
