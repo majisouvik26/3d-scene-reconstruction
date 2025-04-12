@@ -16,8 +16,9 @@ from datetime import datetime as dt
 from pprint import pprint
 
 from config import cfg
-from scripts.train import train_net
-from scripts.test import test_net
+from src.train import train_net
+from src.test import test_net
+from src.test_single import test_single_sample
 
 
 def get_args_from_command_line():
@@ -36,7 +37,8 @@ def get_args_from_command_line():
                         type=int)
     parser.add_argument('--epoch', dest='epoch', help='number of epoches', default=cfg.TRAIN.NUM_EPOCHES, type=int)
     parser.add_argument('--weights', dest='weights', help='Initialize network from the weights file', default=None)
-    parser.add_argument('--out', dest='out_path', help='Set output path', default=cfg.DIR.OUT_PATH)
+    parser.add_argument('--img_dir', dest='img_dir', help='for testing a single sample provide the directory that contains n view images for that model')
+    parser.add_argument('--n_views',dest='n_views',help='number of views(images) to be considered for reconstructing')
     args = parser.parse_args()
     return args
 
@@ -53,10 +55,12 @@ def main():
         cfg.CONST.BATCH_SIZE = args.batch_size
     if args.epoch is not None:
         cfg.TRAIN.NUM_EPOCHES = args.epoch
-    if args.out_path is not None:
-        cfg.DIR.OUT_PATH = args.out_path
     if args.weights is not None:
         cfg.CONST.WEIGHTS = args.weights
+    if args.img_dir is not None:
+        cfg.CONST.IMG_DIR=args.img_dir
+    if args.n_views is not None:
+        cfg.CONST.N_VIEWS=args.n_views
 
     # Print config
     print('Use config:')
@@ -71,14 +75,16 @@ def main():
         train_net(cfg)
     else:
         if 'WEIGHTS' in cfg.CONST and os.path.exists(cfg.CONST.WEIGHTS):
-            test_net(cfg)
+            if args.img_dir:
+                test_single_sample(cfg)
+            else:
+                test_net(cfg)
         else:
             print('[FATAL] %s Please specify the file path of checkpoint.' % (dt.now()))
             sys.exit(2)
 
 
 if __name__ == '__main__':
-    # Setup logger
     mp.log_to_stderr()
     logger = mp.get_logger()
     logger.setLevel(logging.INFO)

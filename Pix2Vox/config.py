@@ -27,11 +27,11 @@ __C.DATASET.TEST_DATASET                    = 'ShapeNet'
 __C.CONST                                   = edict()
 __C.CONST.DEVICE                            = '0'
 __C.CONST.RNG_SEED                          = 0
-__C.CONST.IMG_W                             = 224       
+__C.CONST.IMG_W                             = 224
 __C.CONST.IMG_H                             = 224
 __C.CONST.N_VOX                             = 32
 __C.CONST.BATCH_SIZE                        = 64
-__C.CONST.N_VIEWS_RENDERING                 = 1
+__C.CONST.N_VIEWS_RENDERING                 = 1 
 __C.CONST.CROP_IMG_W                        = 128
 __C.CONST.CROP_IMG_H                        = 128
 

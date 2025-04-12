@@ -1,4 +1,4 @@
-import binvox_rw
+import utils.binvox_rw as binvox_rw
 import numpy as np
 import plotly.graph_objects as go
 from models.encoder import Encoder
@@ -11,7 +11,8 @@ from datetime import datetime as dt
 import utils.data_transforms
 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-cfg.CONST.WEIGHTS='saved_models/Pix2Vox-A-ShapeNet.pth'
+
+cfg.CONST.WEIGHTS='saved_model/Pix2Vox-A-ShapeNet.pth'
 
 
 def read_binvox(file) -> np.ndarray:
@@ -41,30 +42,6 @@ test_transforms = utils.data_transforms.Compose([
     utils.data_transforms.Normalize(mean=cfg.DATASET.MEAN, std=cfg.DATASET.STD),
     utils.data_transforms.ToTensor(),
 ])
-
-
-# def save_binvox(volume):
-
-#     if volume.ndim == 4:
-#         volume = volume.squeeze()
-
-#     volume = (volume >= 0.5).astype(np.uint8)
-
-#     dims = volume.shape
-
-#     print("the dimension after above operation:", dims)
-
-#     translate = [0.0, 0.0, 0.0]       # position offset
-#     scale = 1.0                       # scaling factor
-#     axis_order = 'xyz'               # or 'xzy', etc., depending on your app
-
-#     filename = f"output.binvox"
-#     save_path=os.path.join(save_path,filename)
-
-#     with open(filename, 'wb') as f:
-#         model = binvox_rw.Voxels(volume, dims, translate, scale, axis_order)
-#         model.write(f)
-
 
 
 def predict_voxel_from_images(rendering_images):
@@ -132,7 +109,6 @@ def predict_voxel_from_images(rendering_images):
 
         generated_volume=generated_volume.squeeze(0)
         gv = generated_volume.cpu().numpy()
-
         gv = (gv >= 0.5).astype(np.uint8)
 
 
@@ -140,26 +116,3 @@ def predict_voxel_from_images(rendering_images):
 
     torch.cuda.empty_cache()
     return gv
-
-
-        # for saving
-
-        # get_volume_views(gv,save_dir,img_index)
-
-        # print("After passing to get_volume views: ")
-        # count_0 = sum(1 for plane in gv for row in plane for val in row if val < 0.5)
-        # print(count_0)
-
-        # count_1=sum(1 for plane in gv for row in plane for val in row if val >= 0.5)
-        # print(count_1)
-
-        # save_binvox(gv,save_dir,img_index)
-
-        # with open(gt_binvox_path, 'rb') as f:
-        #     gtv = utils.binvox_rw.read_as_3d_array(f)
-        #     gtv = gtv.data.astype(np.float32)
-
-        # print("For the ground truth: ")
-        # save_dir_gt='model_inference_single_view/ground_truth'
-        # get_volume_views(gtv,save_dir_gt,img_index)
-        # save_binvox(gtv,save_dir_gt,img_index)
