@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<title>3D Gaussian Splatting Viewer</title>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"
+		/>
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta
+			name="apple-mobile-web-app-status-bar-style"
+			content="black-translucent"
+		/>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+		<style>
+			:root {
+				--primary-color: #6366f1;
+				--text-color: #f8fafc;
+				--bg-color: #0f172a;
+				--overlay-color: rgba(15, 23, 42, 0.8);
+			}
+
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				overflow: hidden;
+				margin: 0;
+				height: 100vh;
+				width: 100vw;
+				font-family: 'Inter', sans-serif;
+				background: var(--bg-color);
+				color: var(--text-color);
+				line-height: 1.5;
+			}
+
+			a {
+				color: var(--primary-color);
+				text-decoration: none;
+				transition: opacity 0.2s;
+			}
+
+			a:hover {
+				opacity: 0.8;
+			}
+
+			#info {
+				z-index: 100;
+				position: absolute;
+				top: 20px;
+				left: 20px;
+				max-width: 400px;
+				background: var(--overlay-color);
+				backdrop-filter: blur(12px);
+				padding: 20px;
+				border-radius: 12px;
+				border: 1px solid rgba(255, 255, 255, 0.1);
+			}
+
+			h3 {
+				margin: 0 0 12px 0;
+				font-weight: 600;
+				font-size: 1.25rem;
+			}
+
+			p {
+				margin: 0 0 16px 0;
+				font-size: 0.875rem;
+				opacity: 0.9;
+			}
+
+			.cube-wrapper {
+				transform-style: preserve-3d;
+			}
+
+			.cube {
+				transform-style: preserve-3d;
+				transform: rotateX(45deg) rotateZ(45deg);
+				animation: rotation 2s infinite;
+			}
+
+			.cube-faces {
+				transform-style: preserve-3d;
+				height: 80px;
+				width: 80px;
+				position: relative;
+				transform-origin: 0 0;
+				transform: translateX(0) translateY(0) translateZ(-40px);
+			}
+
+			.cube-face {
+				position: absolute;
+				inset: 0;
+				background: var(--primary-color);
+				border: solid 1px rgba(255, 255, 255, 0.2);
+				box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+			}
+
+			.cube-face.top { transform: translateZ(80px); }
+			.cube-face.front { transform-origin: 0 50%; transform: rotateY(-90deg); }
+			.cube-face.back { transform-origin: 0 50%; transform: rotateY(-90deg) translateZ(-80px); }
+			.cube-face.right { transform-origin: 50% 0; transform: rotateX(-90deg) translateY(-80px); }
+			.cube-face.left { transform-origin: 50% 0; transform: rotateX(-90deg) translateY(-80px) translateZ(80px); }
+
+			@keyframes rotation {
+				0% {
+					transform: rotateX(45deg) rotateY(0) rotateZ(45deg);
+					animation-timing-function: cubic-bezier(0.17, 0.84, 0.44, 1);
+				}
+				50% {
+					transform: rotateX(45deg) rotateY(0) rotateZ(225deg);
+					animation-timing-function: cubic-bezier(0.76, 0.05, 0.86, 0.06);
+				}
+				100% {
+					transform: rotateX(45deg) rotateY(0) rotateZ(405deg);
+					animation-timing-function: cubic-bezier(0.17, 0.84, 0.44, 1);
+				}
+			}
+
+			.scene, #message {
+				position: absolute;
+				display: flex;
+				inset: 0;
+				z-index: 2;
+				align-items: center;
+				justify-content: center;
+			}
+
+			#message {
+				font-weight: 600;
+				font-size: 1.125rem;
+				color: #ef4444;
+				pointer-events: none;
+			}
+
+			details {
+				font-size: 0.875rem;
+				margin-top: 8px;
+			}
+
+			details summary {
+				cursor: pointer;
+				color: var(--primary-color);
+				margin-bottom: 12px;
+			}
+
+			#progress {
+				position: absolute;
+				top: 0;
+				height: 3px;
+				background: var(--primary-color);
+				z-index: 99;
+				transition: width 0.1s ease-in-out;
+				box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+			}
+
+			#quality, #caminfo {
+				position: absolute;
+				z-index: 999;
+				background: var(--overlay-color);
+				backdrop-filter: blur(12px);
+				padding: 8px 12px;
+				border-radius: 8px;
+				font-size: 0.875rem;
+				border: 1px solid rgba(255, 255, 255, 0.1);
+			}
+
+			#quality {
+				bottom: 20px;
+				right: 20px;
+			}
+
+			#caminfo {
+				top: 20px;
+				right: 20px;
+			}
+
+			#canvas {
+				display: block;
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				touch-action: none;
+			}
+
+			#instructions {
+				background: var(--overlay-color);
+				backdrop-filter: blur(12px);
+				white-space: pre-wrap;
+				padding: 16px;
+				border-radius: 8px;
+				font-size: 0.75rem;
+				border: 1px solid rgba(255, 255, 255, 0.1);
+				line-height: 1.6;
+			}
+
+			body.nohf .nohf {
+				display: none;
+			}
+
+			body.nohf #progress, 
+			body.nohf .cube-face {
+				background: #f59e0b;
+			}
+
+			@media (max-width: 768px) {
+				#info {
+					max-width: 90%;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			if(location.host.includes('hf.space')) document.body.classList.add('nohf');
+		</script>
+		<div id="info">
+			<h3 class="nohf">3D Gaussian Splatting Viewer</h3>
+			<p class="nohf">
+				Created by <a href="https://github.com/majisouvik26">Souvik Maji</a>
+			</p>
+
+			<details>
+				<summary>📖 View Controls & Instructions</summary>
+				<div id="instructions">Movement (Arrow Keys)
+- Left/Right: Strafe side to side
+- Up/Down: Move forward/back
+- Space: Jump
+
+Camera Angle (WASD)
+- A/D: Turn camera left/right
+- W/S: Tilt camera up/down
+- Q/E: Roll camera counterclockwise/clockwise
+- I/K and J/L: Orbit
+
+Trackpad
+- Scroll: Orbit
+- Pinch: Move forward/back
+- Ctrl + Scroll: Move forward/back
+- Shift + Scroll: Move up/down or strafe
+
+Mouse
+- Click and drag: Orbit
+- Right click (or Ctrl/Cmd) + drag: Move
+
+Touch (Mobile)
+- One finger: Orbit
+- Two finger pinch: Move forward/back
+- Two finger rotate: Rotate camera
+- Two finger pan: Move side-to-side and up-down
+
+Additional Controls
+- 0-9: Switch to pre-loaded camera views
+- '-' or '+': Cycle loaded cameras
+- 'P': Resume default animation
+- Drag & drop .ply file to convert to .splat
+- Drag & drop cameras.json to load cameras</div>
+			</details>
+		</div>
+
+		<div id="progress"></div>
+		<div id="message"></div>
+		
+		<div class="scene" id="spinner">
+			<div class="cube-wrapper">
+				<div class="cube">
+					<div class="cube-faces">
+						<div class="cube-face bottom"></div>
+						<div class="cube-face top"></div>
+						<div class="cube-face left"></div>
+						<div class="cube-face right"></div>
+						<div class="cube-face back"></div>
+						<div class="cube-face front"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<canvas id="canvas"></canvas>
+
+		<div id="quality">
+			<span id="fps"></span>
+		</div>
+		<div id="caminfo">
+			<span id="camid"></span>
+		</div>
+
+		<script src="main.js"></script>
+	</body>
+</html>
