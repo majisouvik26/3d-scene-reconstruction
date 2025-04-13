@@ -16,7 +16,7 @@ This is an implementation of Neural Radiance Fields (NeRF) for 3D scene reconstr
 
 ```bash
 git clone https://github.com/majisouvik26/3d-scene-reconstruction
-cd NeRF
+cd exps/NeRF
 ```
 
 2. Install the required dependencies:
